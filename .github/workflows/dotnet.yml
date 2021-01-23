@@ -67,3 +67,25 @@ jobs:
         name: ${{ env.NOME_ARTIFACT_PUBLICACAO }}
         path: ${{ env.NOME_DIR_PUBLICACAO }}
 
+  deployment:
+    needs: [publish]
+
+    runs-on: ubuntu-latest
+    
+    steps:    
+      - name: Download do Artifact contendo a Publicação
+        uses: actions/download-artifact@v2.0.8
+        with:
+          name: ${{ env.NOME_ARTIFACT_PUBLICACAO }}
+          path: ${{ env.NOME_DIR_PUBLICACAO }}
+          
+      - name: Login no Azure
+        uses: Azure/login@v1.1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deployment no Azure App Service
+        uses: Azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.NOME_WEBAPP_AZURE }}
+          package: ${{ env.NOME_DIR_PUBLICACAO }}
